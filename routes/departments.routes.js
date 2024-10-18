@@ -3,7 +3,16 @@ const router = express.Router();
 const db = require('./../db');
 
 router.get('/departments', (req, res) => {
-  res.json(db.departments);
+  //res.json(db.departments);
+  req.db.collection('departments')
+    .find()
+    .toArray()
+    .then((data) => {
+      res.json(data);
+    })
+    .catch((err) => {
+      res.status(500).json({ message: err });
+    });
 });
 
 router.get('/departments/random', (req, res) => {
