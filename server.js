@@ -8,37 +8,46 @@ const mongoose = require('mongoose');
 //         console.log(err);
 //     }
 //     else {
-        //const db = client.db('companyDB'); // znajdź na serwerze bazę o nazwie companyDB i przypisz jej referencje do stałej db
-        const employeesRoutes = require('./routes/employees.routes');
-        const departmentsRoutes = require('./routes/departments.routes');
-        const productsRoutes = require('./routes/products.routes');
+//const db = client.db('companyDB'); // znajdź na serwerze bazę o nazwie companyDB i przypisz jej referencje do stałej db
+const employeesRoutes = require('./routes/employees.routes');
+const departmentsRoutes = require('./routes/departments.routes');
+const productsRoutes = require('./routes/products.routes');
 
-        app.use(cors());
-        app.use(express.json());
-        app.use(express.urlencoded({ extended: false }));
-        // app.use((req, res, next) => {
-        //     req.db = db;
-        //     next(); 
-        // });
-        app.use('/api', employeesRoutes);
-        app.use('/api', departmentsRoutes);
-        app.use('/api', productsRoutes);
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+// app.use((req, res, next) => {
+//     req.db = db;
+//     next(); 
+// });
+app.use('/api', employeesRoutes);
+app.use('/api', departmentsRoutes);
+app.use('/api', productsRoutes);
 
-        app.use((req, res) => {
-            res.status(404).send({ message: 'Not found...' });
-        })
+app.use((req, res) => {
+    res.status(404).send({ message: 'Not found...' });
+})
 
-        mongoose.connect('mongodb://0.0.0.0:27017/companyDB', { useNewUrlParser: true, useUnifiedTopology: true });
-        const db = mongoose.connection;
+const NODE_ENV = process.env.NODE_ENV;
+let dbUri = '';
 
-        db.once('open', () => { // once wykryje zdarzenie raz i potem nie ma sensu już na nie nasłuchiwać. ** once - wykrywa zdarzenie tylko raz ** 
-            console.log('Connected to the database');
-        });
-        db.on('error', err => console.log('Error ' + err));
+if (NODE_ENV === 'production') dbUri = 'mongodb://0.0.0.0:27017/companyDB';
+else if (NODE_ENV === 'test') dbUri = 'mongodb://0.0.0.0:27017/companyDBtest';
+else dbUri = 'mongodb://0.0.0.0:27017/companyDB';
 
-        app.listen('8000', () => {
-            console.log('Server is running on port: 8000');
-        });
-        console.log('Succesfully connected to the database');
-    // }
+mongoose.connect(dbUri, { useNewUrlParser: true, useUnifiedTopology: true });
+const db = mongoose.connection;
+
+db.once('open', () => { // once wykryje zdarzenie raz i potem nie ma sensu już na nie nasłuchiwać. ** once - wykrywa zdarzenie tylko raz ** 
+    console.log('Connected to the database');
+});
+db.on('error', err => console.log('Error ' + err));
+
+const server = app.listen('8000', () => {
+    console.log('Server is running on port: 8000');
+});
+console.log('Succesfully connected to the database');
+
+module.exports = server;
+// }
 // });
